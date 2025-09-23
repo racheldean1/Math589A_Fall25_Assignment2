@@ -1,6 +1,6 @@
 def paqlu_decomposition_in_place(A):
     # A given rectangular matrix.
-    # Constructs matrix decomposition P@A@Q=L@U in place, so that
+    # Constructs matrix decomposition PAQ=LU in place, so that
     # P and Q are permuation matrices corresponding to row and column exchanges.
     # The purpose of column exchanges (simulated) is to place pivot columns
     # before non-pivot columns.
@@ -12,8 +12,8 @@ def paqlu_decomposition_in_place(A):
 
 def solve(A, b):
     # Return matrix N and vector c such that
-    # x = N@y + c
-    # is a solution of A@x=b for every vector y (free variables)
+    # x = N@xfree + c
+    # is a solution of A@x=b for every vector  xfree (free variables)
     return N, c
 
 
