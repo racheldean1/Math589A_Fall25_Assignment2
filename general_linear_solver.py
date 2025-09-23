@@ -1,14 +1,19 @@
-def plu_decomposition_in_place(A):
-    # A given rectangular matrix
-    # Upon return, A must contain the PA=LU decomposition (L and U portion).
-    # The calculation must be performed in place
+def paqlu_decomposition_in_place(A):
+    # A given rectangular matrix.
+    # Constructs matrix decomposition PAQ=LU in place, so that
+    # P and Q are permuation matrices corresponding to row and column exchanges.
+    # The purpose of column exchanges (simulated) is to place pivot columns
+    # before non-pivot columns.
+    # Upon return, A must contain the PAQ=LU decomposition (L and U portion).
+    # Thus, the calculation must be performed "in place" style.
     # Note: P, Q must be vectors, not 2D arrays
     return P, Q, A
 
 
-
-def solve(A, B):
-    
+def solve(A, b):
+    # Return matrix N and vector c such that
+    # x = N@y + c
+    # is a solution for every vector y (free variables)
     return N, c
 
 
