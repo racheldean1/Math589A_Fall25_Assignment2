@@ -4,7 +4,7 @@ Math 589A, Programming Assignment 2
 Problem 1. 
 ==========
 
-Implement the PA=LU decomposition. The algorithm should perform
+Implement the PAQ=LU decomposition. The algorithm should perform
 partial pivoting with simulated row exchanges, using only a vector P
 and matrix A, which will eventually hold the L and U components of the
 decomposition (PA=LU decomposition "in place"; the original matrix A
