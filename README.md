@@ -19,4 +19,28 @@ are implicit.
 
 
 
+Problem 2.
+==========
+
+Write a solver of all linear systems Ax=b, utilizing the PA=LU decomposition
+found in Problem 1. Note that the pivot columns of U correspond to basic variables,
+and other columns to free variables. General idea is to write the solution
+as 
+                  x = N*x_free + c
+				  
+where N is a suitable matrix. Note that the system Ax=b can be written as
+L.U*x = P^T.b  or a system
+
+Ly = P^T b
+
+U*x = y
+
+You should figure out the matrix N for the system U*x=y first. Then
+use invertibility of L to find the general N.
+	             
+
+
+				  
+
+
 
