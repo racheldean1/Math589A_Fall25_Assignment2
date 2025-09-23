@@ -28,8 +28,8 @@ and other columns to free variables. General idea is to write the solution
 as 
                   x = N*x_free + c
 				  
-where N is a suitable matrix. The separate LaTeX document in this folder
-derives N and c.
+where N is a suitable matrix. The separate LaTeX document
+[derivation.tex](derivation.tex) in this folder derives N and c.
 	             
 
 
