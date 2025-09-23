@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsmath,amssymb,amsfonts,fullpage}
 \usepackage{microtype}
 \begin{document}
 
@@ -12,50 +12,71 @@ Introduce \(y:=Ux\). Then the system is equivalent to the triangular systems
 Ly=Pb,\qquad Ux=y.
 \]
 
-Let the pivot (basic) column indices of \(U\) be \(B\) and the remaining (free) column indices be \(F\). If \(|B|=r\) then partition the unknown \(x\) and the matrix \(U\) conformably as
-\[
-x=\begin{pmatrix}x_B\\[2pt] x_F\end{pmatrix},\qquad
-U=\begin{pmatrix}U_B & U_F\end{pmatrix},
-\]
-where \(U_B\) consists of the pivot columns (so \(U_B\in\mathbb{R}^{m\times r}\)) and \(U_F\in\mathbb{R}^{m\times(n-r)}\) the free columns. Restricting to the pivot rows of \(U\) (the rows that contain the leading entries) yields an \(r\times r\) upper triangular submatrix which is invertible; hence, after discarding any all‑zero trailing rows of \(U\), we may view the corresponding leading part of \(U_B\) as an invertible \(r\times r\) matrix (which we continue to denote by \(U_B\) when no confusion arises).
+The columns of \(U\) fall into two classes: pivot (basic) columns and nonpivot (free) columns. Let the pivot column indices be \(B\subset\{1,\dots,n\}\) and the complement (free) column indices be \(F=\{1,\dots,n\}\setminus B\). If \(|B|=r\), then the basic variables are the components of \(x\) indexed by \(B\) and the free variables are those indexed by \(F\).
 
-From
+Important remark: the pivot columns of \(U\) are not, in general, the leftmost columns of \(U\). In other words, \(U_B\) (the matrix formed from the pivot columns) is usually not equal to the left block of \(U\) unless a suitable column reordering has been applied. To work with a block partitioned form of \(U\) one therefore needs to perform a column permutation (or equivalently select columns by index). We now explain this in detail.
+
+Define a permutation matrix \(Q\in\mathbb{R}^{n\times n}\) that reorders the standard basis so that the pivot column indices \(B\) are moved to the first \(r\) positions and the free indices \(F\) occupy the remaining \(n-r\) positions. Equivalently,
 \[
-Ux = U_B x_B + U_F x_F = y
+UQ = \bigl[\,U(:,B)\ \; U(:,F)\,\bigr] =: \begin{pmatrix}U_B & U_F\end{pmatrix},
 \]
-we solve for the basic variables \(x_B\):
+where \(U(:,B)\) denotes the submatrix of \(U\) formed by the columns indexed by \(B\). (If one prefers not to form an explicit \(Q\), one may work directly with the column‑selection operators \(U_B=U(:,B)\) and \(U_F=U(:,F)\), but introducing \(Q\) makes the block formulas below concise.)
+
+Correspondingly permute the unknowns via
 \[
-x_B = U_B^{-1}(y - U_F x_F).
+x' := Q^{T}x,
 \]
-Thus the general solution of \(Ux=y\) (with free parameters \(x_F\in\mathbb{R}^{\,n-r}\)) is
+so that \(x' = \begin{pmatrix}x'_B\\ x'_F\end{pmatrix}\) with \(x'_B\in\mathbb{R}^{r}\) the basic components and \(x'_F\in\mathbb{R}^{\,n-r}\) the free components in the reordered variable vector. Then
 \[
-x=\begin{pmatrix}x_B\\[2pt] x_F\end{pmatrix}
-=\begin{pmatrix}U_B^{-1}y\\[2pt] 0\end{pmatrix}
-+\begin{pmatrix}-U_B^{-1}U_F\\[2pt] I_{\,n-r}\end{pmatrix}x_F.
+Ux = U(QQ^{T})x = (UQ)x' = \begin{pmatrix}U_B & U_F\end{pmatrix}\begin{pmatrix}x'_B\\[2pt] x'_F\end{pmatrix}.
 \]
-Therefore for the subsystem \(Ux=y\) the matrix \(N\) that maps the free variables \(x_F\) to the full solution \(x\) is
+
+As usual, restrict attention to the pivot rows (the rows that contain the leading entries of the selected pivot columns). After discarding any all‑zero trailing rows of \(U\) we obtain an \(r\times r\) upper triangular invertible submatrix formed by the pivot rows and pivot columns; this is the invertible \(U_B\) referred to above (viewed as \(r\times r\) once restricted to pivot rows) and \(U_F\) is the corresponding \(r\times(n-r)\) block of free columns restricted to the pivot rows. With these conventions the equation \(Ux=y\) becomes, in the permuted variables,
 \[
-N=\begin{pmatrix}-U_B^{-1}U_F\\[3pt] I_{\,n-r}\end{pmatrix}\in\mathbb{R}^{\,n\times(n-r)},
+U_B x'_B + U_F x'_F = y_{\mathrm{pivot}},
 \]
-and the particular part (independent of \(x_F\)) is \(c'(y)=\begin{pmatrix}U_B^{-1}y\\[2pt]0\end{pmatrix}\).
+where \(y_{\mathrm{pivot}}\) denotes the entries of \(y\) corresponding to the pivot rows (equivalently, \(y_{\mathrm{pivot}}\) is the leading \(r\) entries of \(y\) after discarding any zero trailing rows of \(U\)). Solving for the basic variables gives
+\[
+x'_B = U_B^{-1}\bigl(y_{\mathrm{pivot}} - U_F x'_F\bigr).
+\]
+Hence the general solution in the permuted coordinates is
+\[
+x'=\begin{pmatrix}x'_B\\[2pt] x'_F\end{pmatrix}
+=\begin{pmatrix}U_B^{-1}y_{\mathrm{pivot}}\\[2pt] 0\end{pmatrix}
++\begin{pmatrix}-U_B^{-1}U_F\\[2pt] I_{\,n-r}\end{pmatrix}x'_F,
+\qquad x'_F\in\mathbb{R}^{\,n-r}\ \text{arbitrary}.
+\]
+
+Returning to the original variable ordering \(x = Qx'\), the particular part and the null‑space part of the solution in the original coordinates are obtained by applying \(Q\) to the two blocks above. Thus the null‑space mapping \(N\) (which maps free parameters to full solutions in the original ordering) and the particular vector \(c\) are
+\[
+N \;=\; Q
+\begin{pmatrix}-U_B^{-1}U_F\\[3pt] I_{\,n-r}\end{pmatrix}
+\in\mathbb{R}^{\,n\times(n-r)},\qquad
+c \;=\; Q\begin{pmatrix}U_B^{-1}y_{\mathrm{pivot}}\\[3pt]0\end{pmatrix}.
+\]
 
 Finally, using invertibility of \(L\) we express \(y\) in terms of \(b\):
 \[
-y=L^{-1}Pb.
+y=L^{-1}Pb,
 \]
-Substituting this into \(c'(y)\) gives the particular vector for the original system \(Ax=b\):
+and \(y_{\mathrm{pivot}}\) is the restriction of this vector to the pivot rows. Substituting gives the particular vector for the original system \(Ax=b\):
 \[
-c=\begin{pmatrix}U_B^{-1}L^{-1}Pb\\[2pt]0\end{pmatrix}.
+c \;=\; Q\begin{pmatrix}U_B^{-1}L^{-1}Pb_{\mathrm{pivot}}\\[3pt]0\end{pmatrix}
+= Q\begin{pmatrix}U_B^{-1}L^{-1}Pb\\[3pt]0\end{pmatrix},
 \]
-Hence the full solution of \(Ax=b\) is
+where the latter equality indicates that \(U_B^{-1}\) is applied to the entries of \(L^{-1}Pb\) corresponding to the pivot rows (zero entries in trailing rows of \(U\) play no role).
+
+Therefore the full solution of \(Ax=b\) in the original variable ordering is
 \[
-x=N x_F + c,
+x = N x_F + c,
 \]
 with
 \[
-N=\begin{pmatrix}-U_B^{-1}U_F\\[3pt] I_{\,n-r}\end{pmatrix},\qquad
-c=\begin{pmatrix}U_B^{-1}L^{-1}Pb\\[3pt]0\end{pmatrix},
+N = Q\begin{pmatrix}-U_B^{-1}U_F\\[3pt] I_{\,n-r}\end{pmatrix},\qquad
+c = Q\begin{pmatrix}U_B^{-1}L^{-1}Pb\\[3pt]0\end{pmatrix},
 \]
-where \(x_F\in\mathbb{R}^{\,n-r}\) is arbitrary. Note that \(N\) depends only on the LU factor (and the pivot pattern), not on \(b\).
+and \(x_F\in\mathbb{R}^{\,n-r}\) arbitrary. Note that \(N\) depends only on the LU factor (and the pivot pattern encoded by \(Q\)), not on \(b\).
+
+In practice one may implement these steps either by (i) forming the column‑permutation \(Q\) that brings pivot columns to the front and working with the left block \(U_B\), or (ii) by working directly with indexed column selections \(U(:,B)\) and \(U(:,F)\) and mapping the components of \(x\) between the original and reduced orderings as required. The algebra above makes explicit how the required column operations (reordering or selection) enter into the construction of \(U_B\), \(U_F\), \(N\) and \(c\).
 
 \end{document}
