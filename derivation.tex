@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{microtype}
+\begin{document}
+
+Assume \(PA=LU\) is a row‑permuted LU factorization of \(A\) (so \(A=P^{T}LU\)). Let \(b\) be given and consider \(Ax=b\). Multiplying by \(P\) gives
+\[
+LUx=Pb.
+\]
+Introduce \(y:=Ux\). Then the system is equivalent to the triangular systems
+\[
+Ly=Pb,\qquad Ux=y.
+\]
+
+Let the pivot (basic) column indices of \(U\) be \(B\) and the remaining (free) column indices be \(F\). If \(|B|=r\) then partition the unknown \(x\) and the matrix \(U\) conformably as
+\[
+x=\begin{pmatrix}x_B\\[2pt] x_F\end{pmatrix},\qquad
+U=\begin{pmatrix}U_B & U_F\end{pmatrix},
+\]
+where \(U_B\) consists of the pivot columns (so \(U_B\in\mathbb{R}^{m\times r}\)) and \(U_F\in\mathbb{R}^{m\times(n-r)}\) the free columns. Restricting to the pivot rows of \(U\) (the rows that contain the leading entries) yields an \(r\times r\) upper triangular submatrix which is invertible; hence, after discarding any all‑zero trailing rows of \(U\), we may view the corresponding leading part of \(U_B\) as an invertible \(r\times r\) matrix (which we continue to denote by \(U_B\) when no confusion arises).
+
+From
+\[
+Ux = U_B x_B + U_F x_F = y
+\]
+we solve for the basic variables \(x_B\):
+\[
+x_B = U_B^{-1}(y - U_F x_F).
+\]
+Thus the general solution of \(Ux=y\) (with free parameters \(x_F\in\mathbb{R}^{\,n-r}\)) is
+\[
+x=\begin{pmatrix}x_B\\[2pt] x_F\end{pmatrix}
+=\begin{pmatrix}U_B^{-1}y\\[2pt] 0\end{pmatrix}
++\begin{pmatrix}-U_B^{-1}U_F\\[2pt] I_{\,n-r}\end{pmatrix}x_F.
+\]
+Therefore for the subsystem \(Ux=y\) the matrix \(N\) that maps the free variables \(x_F\) to the full solution \(x\) is
+\[
+N=\begin{pmatrix}-U_B^{-1}U_F\\[3pt] I_{\,n-r}\end{pmatrix}\in\mathbb{R}^{\,n\times(n-r)},
+\]
+and the particular part (independent of \(x_F\)) is \(c'(y)=\begin{pmatrix}U_B^{-1}y\\[2pt]0\end{pmatrix}\).
+
+Finally, using invertibility of \(L\) we express \(y\) in terms of \(b\):
+\[
+y=L^{-1}Pb.
+\]
+Substituting this into \(c'(y)\) gives the particular vector for the original system \(Ax=b\):
+\[
+c=\begin{pmatrix}U_B^{-1}L^{-1}Pb\\[2pt]0\end{pmatrix}.
+\]
+Hence the full solution of \(Ax=b\) is
+\[
+x=N x_F + c,
+\]
+with
+\[
+N=\begin{pmatrix}-U_B^{-1}U_F\\[3pt] I_{\,n-r}\end{pmatrix},\qquad
+c=\begin{pmatrix}U_B^{-1}L^{-1}Pb\\[3pt]0\end{pmatrix},
+\]
+where \(x_F\in\mathbb{R}^{\,n-r}\) is arbitrary. Note that \(N\) depends only on the LU factor (and the pivot pattern), not on \(b\).
+
+\end{document}
