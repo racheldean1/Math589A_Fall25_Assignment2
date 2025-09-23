@@ -7,8 +7,12 @@ Problem 1.
 Implement the PAQ=LU decomposition. The algorithm should perform
 partial pivoting with simulated row exchanges, using only a vector P
 and matrix A, which will eventually hold the L and U components of the
-decomposition (PA=LU decomposition "in place"; the original matrix A
-is destroyed in the process).
+decomposition (PAQ=LU decomposition "in place"; the original matrix A
+is destroyed in the process). The PAQ=LU decomposition performs
+row and column exchanges, so that all pivot columns appear before
+non-pivot columns. The column exchange is virtual, i.e.,
+only the position of pivot columns is recorded in Q.
+
 
 The algorithm from the book should be modified to handle a rectangular
 matrix A.  Derive the algorithm by assuming that the rectangular
