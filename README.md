@@ -26,7 +26,7 @@ are implicit.
 Problem 2.
 ==========
 
-Write a solver of all linear systems Ax=b, utilizing the PA=LU decomposition
+Write a solver of all linear systems Ax=b, utilizing the PAQ=LU decomposition
 found in Problem 1. Note that the pivot columns of U correspond to basic variables,
 and other columns to free variables. General idea is to write the solution
 as 
