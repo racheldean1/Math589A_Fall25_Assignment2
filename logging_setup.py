@@ -1,4 +1,6 @@
-# Insert this code at the top of your implementation file
+# File: logging_setup.py
+# Insert this code at the top of your implementation file.
+# Alternatively, import this file as a module (even better).
 # (most likely, general_linear_solver.py) to enable logging.
 # REMEMBER: Don't print, log.
 
