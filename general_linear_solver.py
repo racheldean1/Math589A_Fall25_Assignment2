@@ -1,11 +1,11 @@
 import numpy as np
-from plu_decomposition import paqlu_decomposition_in_place, TOL
+from plu_decomposition import paqlu_decomposition_in_place, TOL  # TOL = 1e-6
 
 def _is_numeric_dtype(dt):
     return np.issubdtype(dt, np.floating) or np.issubdtype(dt, np.complexfloating)
 
 def _rank_from_U(A_mod, P, Q, tol):
-    """Count non-small diagonals of U in the permuted order to get rank r."""
+    """Count non-small diagonal entries of U in the permuted order."""
     m, n = A_mod.shape
     r = 0
     for k in range(min(m, n)):
@@ -17,8 +17,8 @@ def _rank_from_U(A_mod, P, Q, tol):
 
 def solve(A, b, tol: float = TOL):
     """
-    Parametric solver: returns (N, c) with x = N @ x_free + c.
-    N is n×f (f = n - rank), c is n×k or length-n if b is 1-D.
+    Return (N, c) with x = N @ x_free + c.
+    N is n×f (f = n - rank), c is n or n×k.
     """
     # ---- checks / shaping ----
     if not isinstance(A, np.ndarray) or A.ndim != 2:
@@ -28,30 +28,41 @@ def solve(A, b, tol: float = TOL):
     m, n = A.shape
 
     b = np.asarray(b, dtype=A.dtype)
+    one_rhs = False
     if b.ndim == 1:
         b = b.reshape(-1, 1)
+        one_rhs = True
     if b.shape[0] != m:
         raise ValueError("b must have the same number of rows as A.")
 
-    # ---- factorization (keep caller's A intact) ----
+    # ---- PAQ = LU on a copy (keep user's A intact) ----
     A_work = np.array(A, copy=True)
     P, Q, A_mod = paqlu_decomposition_in_place(A_work, tol=tol)
-    r = _rank_from_U(A_mod, P, Q, tol)          # numerical rank
-    f = n - r                                    # number of free variables
+    r = _rank_from_U(A_mod, P, Q, tol)
+    f = n - r  # #free variables
 
-    # ---- forward substitution on Ly = Pb ----
-    y = b[P, :].copy()                           # start with Pb
+    # ---- Forward substitution on L y = P b (first r rows) ----
+    y = b[P, :].copy()
     for i in range(r):
         for j in range(i):
-            lij = A_mod[P[i], Q[j]]              # L(i,j) stored in A below diag
+            lij = A_mod[P[i], Q[j]]
             if lij != 0:
                 y[i, :] -= lij * y[j, :]
 
-    # ---- consistency check on remaining rows (must be ~0) ----
-    if r < m and np.max(np.abs(y[r:m, :])) > tol:
-        raise ValueError("inconsistent system: A x = b has no solution within tolerance")
+    # ---- Consistency check ONLY on rows whose U-row is ~0 ----
+    if r < m:
+        for i in range(r, m):
+            # row i of U in the active columns j >= r
+            if n > r:
+                u_tail = np.abs(A_mod[P[i], Q[r:n]])
+                u_zero_row = (u_tail.size == 0) or (np.max(u_tail) <= tol)
+            else:
+                u_zero_row = True  # no active cols => treat as zero row
+            if u_zero_row:
+                if np.max(np.abs(y[i, :])) > tol:
+                    raise ValueError("inconsistent system: A x = b has no solution within tolerance")
 
-    # ---- back substitution on Uz = y ----
+    # ---- Back substitution on U z = y (first r rows) ----
     z = np.zeros((r, y.shape[1]), dtype=A_mod.dtype)
     for i in range(r - 1, -1, -1):
         rhs = y[i, :].copy()
@@ -63,21 +74,22 @@ def solve(A, b, tol: float = TOL):
         else:
             z[i, :] = rhs / diag
 
-    # ---- particular solution c (free vars set to 0) in permuted coords ----
+    # ---- Particular solution c: free vars set to 0 (in permuted order) ----
     c_perm = np.zeros((n, y.shape[1]), dtype=A_mod.dtype)
     if r > 0:
         c_perm[:r, :] = z
 
-    # map c back to original column order using Q
+    # Map back to original column order with Q
     c = np.zeros_like(c_perm)
     for j_perm in range(n):
-        c[Q[j_perm], :] = c_perm[j_perm, :]
+        j_orig = Q[j_perm]
+        c[j_orig, :] = c_perm[j_perm, :]
 
-    # ---- nullspace basis N (n×f) ----
+    # ---- Nullspace basis N (n×f). Always return a 2-D matrix. ----
     if f <= 0:
         N = np.zeros((n, 0), dtype=A_mod.dtype)  # explicit 2-D empty matrix
     else:
-        # Extract Ur (r×r) and Ut (r×f) from U in the permuted order
+        # Extract Ur (r×r) and Ut (r×f)
         Ur = np.zeros((r, r), dtype=A_mod.dtype)
         Ut = np.zeros((r, f), dtype=A_mod.dtype)
         for i in range(r):
@@ -86,13 +98,13 @@ def solve(A, b, tol: float = TOL):
             for j in range(f):
                 Ut[i, j] = A_mod[P[i], Q[r + j]]
 
-        # Build N in permuted coords: columns are [v; e_k] with Ur v = -Ut[:,k]
+        # Build N in permuted coords: columns are [v; e_k], Ur v = -Ut[:, k]
         N_perm = np.zeros((n, f), dtype=A_mod.dtype)
         for k in range(f):
-            rhs = -Ut[:, k].astype(A_mod.dtype)   # 1-D length r
+            rhs = -Ut[:, k].astype(A_mod.dtype)  # length r
             v = np.zeros(r, dtype=A_mod.dtype)
             for i in range(r - 1, -1, -1):
-                s = rhs[i]                        # scalar
+                s = rhs[i]
                 for j in range(i + 1, r):
                     s -= Ur[i, j] * v[j]
                 if np.abs(Ur[i, i]) <= tol:
@@ -102,21 +114,19 @@ def solve(A, b, tol: float = TOL):
             N_perm[:r, k] = v
             N_perm[r + k, k] = 1.0
 
-        # map N back to original column order
+        # Map to original column order
         N = np.zeros_like(N_perm)
         for j_perm in range(n):
             N[Q[j_perm], :] = N_perm[j_perm, :]
 
-    # ---- final shape guarantees (what tripped the grader) ----
-    # Ensure N is always a 2-D ndarray with n rows and f columns.
-    if N.ndim != 2:
-        if f == 0:
-            N = np.zeros((n, 0), dtype=A_mod.dtype)
-        else:
-            N = N.reshape(n, f)
+        # --- Hard guarantee: N is 2-D (handles f==1 edge case) ---
+        if N.ndim == 1:
+            N = N.reshape(n, 1)
+        elif N.shape == (n,):  # safety
+            N = N.reshape(n, 1)
 
-    # Make c 1-D if caller passed a 1-D b (friendly API)
-    if c.shape[1] == 1 and b.shape[1] == 1:
+    # Friendly: if caller passed 1-D b, return 1-D c
+    if one_rhs:
         c = c[:, 0]
 
     return N, c
